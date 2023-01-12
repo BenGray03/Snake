@@ -13,18 +13,36 @@ struct tail{ // structure for each 'piece' of the snake
 };
 
 struct Snake{ //structure for the snake as a whole
-    int length;
+    int
+    length;
     int orientation;
     struct tail *head;
     int points;
     int alive;
 };
 
-void setApple(char field[30][30]){ // sets the apple pos on the map
+int checkValidPos(int Ax, int Ay, struct Snake *player){
+    struct tail *check = (struct tail*)malloc(sizeof(struct tail));
+    check = player->head;
+    for(int i = 0; i < player->length; i++){
+        if(check->x == Ax && check->y == Ay){
+            return 0;
+        }
+        check = check->next;
+    }
+    return 1;
+}
+
+void setApple(char field[30][30], struct Snake *player){ // sets the apple pos on the map
     srand(time(0));
     int Aplx = (rand() % 29);
     int Aply = (rand() % 29);
-    field[Aplx][Aply] = 'A';
+    int valid = checkValidPos(Aplx, Aply, player);
+    if(valid == 1){
+        field[Aplx][Aply] = 'A';
+    }else{
+        setApple(field, player);
+    }
 }
 
 
@@ -88,7 +106,7 @@ void checkEaten(char field[30][30], struct tail *front, struct Snake *player){//
     if(field[front->x][front->y] == 'A'){ 
         player->points++;
         player->length++;
-        setApple(field);
+        setApple(field, player);
     }
 }
 
@@ -172,7 +190,7 @@ int main(){
     struct timeval timeout;
 
     char ready;
-    printf("Hello welcome to snake!\nUse a and d keys to turn left and right!\nPress any key to continue!");
+    printf("Hello welcome to snake!\nUse a and d keys to turn left and right but press enter after!\nPress any key to continue!\n");
     scanf("%c", &ready);
 
 
@@ -180,7 +198,7 @@ int main(){
     int rotate;
     initialiseField(field); 
     setSnake(player, field);
-    setApple(field);
+    setApple(field, player);
     while(player->alive == 1){
         rotate = 0;
         FD_ZERO(&readfds);
