@@ -171,6 +171,11 @@ int main(){
     fd_set readfds;
     struct timeval timeout;
 
+    char ready;
+    printf("Hello welcome to snake!\nUse a and d keys to turn left and right!\nPress any key to continue!");
+    scanf("%c", &ready);
+
+
     char field [30][30];
     int rotate;
     initialiseField(field); 
@@ -186,7 +191,6 @@ int main(){
             rotate = getchar();
             if(rotate == 97 || rotate == 65 || rotate == 68 || rotate == 100){
                 changeOrientation(player, rotate);
-                printf("%d",player->orientation);
             }
         }
         player->head = updateHead(player, field);
