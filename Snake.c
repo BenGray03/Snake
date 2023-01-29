@@ -4,6 +4,7 @@
 #include <time.h> 
 #include <sys/select.h>
 #include <unistd.h>
+#include <ncurses.h>
 
 
 struct tail{ // structure for each 'piece' of the snake
@@ -13,8 +14,7 @@ struct tail{ // structure for each 'piece' of the snake
 };
 
 struct Snake{ //structure for the snake as a whole
-    int
-    length;
+    int length;
     int orientation;
     struct tail *head;
     int points;
@@ -22,7 +22,10 @@ struct Snake{ //structure for the snake as a whole
 };
 
 int checkValidPos(int Ax, int Ay, struct Snake *player){
-    struct tail *check = (struct tail*)malloc(sizeof(struct tail));
+    struct tail *check = NULL;
+    while(check == NULL){
+        check = (struct tail*)malloc(sizeof(struct tail));
+    }
     check = player->head;
     for(int i = 0; i < player->length; i++){
         if(check->x == Ax && check->y == Ay){
@@ -48,14 +51,16 @@ void setApple(char field[30][30], struct Snake *player){ // sets the apple pos o
 
 
 void printField(char field[30][30], struct Snake *player){ //prints the field one row and column at a time
-    printf("Points: %d\n", player->points);
+    clear();
+    printw("Points: %d\n", player->points);
     for(int i = 29; i >= 0; i--){
         for(int j = 0; j < 30; j++){
-            printf("%c", field[j][i]);
+            printw("%c", field[j][i]);
         }
-        printf("\n");
+        printw("\n");
     }
-    printf("\n");
+    printw("\n");
+    refresh();
 }
 
 struct tail* setTail(){ //sets the snake intial position
@@ -113,7 +118,10 @@ void checkEaten(char field[30][30], struct tail *front, struct Snake *player){//
 
 struct tail * updateHead(struct Snake *player, char field [30][30]){//will be broken down into multiple parts as most compleax part
     int eaten = 0;
-    struct tail *new_head = (struct tail *)malloc(sizeof(struct tail));//this will be returned head of the tail
+    struct tail *new_head = NULL;
+    while(new_head == NULL){
+        new_head = (struct tail *)malloc(sizeof(struct tail));//this will be returned head of the tail
+    }
     struct tail *upd = (struct tail *)malloc(sizeof(struct tail)); //used to help update the tail
     if(player->orientation == 0){ // checks rotation and sets upd to that
         upd->y = (player->head->y) +1;
@@ -140,6 +148,7 @@ struct tail * updateHead(struct Snake *player, char field [30][30]){//will be br
             if (previous != NULL) {
                 previous->next = NULL;
             }
+            printw("freeing");
             free(current);
             break;
         }
@@ -184,13 +193,17 @@ void checkKillsSelf(struct Snake *player){// checks if user crosses their own pa
 }
 
 int main(){
+    initscr();
+    raw();
+    noecho();
     struct Snake *player = (struct Snake*)malloc(sizeof(struct Snake));
 
     fd_set readfds;
     struct timeval timeout;
 
     char ready;
-    printf("Hello welcome to snake!\nUse a and d keys to turn left and right but press enter after!\nPress any key to continue!\n");
+    printw("Hello welcome to snake!\nUse a and d keys to turn left and right.\nPress any key to continue!\n");
+    refresh();
     scanf("%c", &ready);
 
 
@@ -219,8 +232,10 @@ int main(){
         printField(field, player);
 
     }
-
-    printf("The end you got a score of %d\nThank you for playing!\n", player->points);
-    
+    clear();
+    printw("The end you got a score of %d\nThank you for playing!\n", player->points);
+    refresh();
+    getch();
+    endwin();
 
 }
